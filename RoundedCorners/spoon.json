@@ -1,0 +1,6 @@
+{
+    "name": "RoundedCorners",
+    "author": "Chris Jones",
+    "version": "2.0.0",
+    "description": "Masks the square physical corners of every screen with a true rounded-corner cutout (via hs.canvas path clipping), to mimic a rounded-corner display."
+}
