@@ -1,0 +1,6 @@
+{
+    "name": "URLDispatcher",
+    "author": "Chris Jones",
+    "version": "1.0.0",
+    "description": "Routes http/https URLs to different browsers/apps based on URL or sending-app patterns, when Hammerspoon 2 is the default browser handler."
+}
