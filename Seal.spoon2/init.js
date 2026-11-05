@@ -19,7 +19,6 @@ let hotkey = null
 
 let appCache = []           // [{ text, bundleID }]
 let pasteboardHistory = []  // [string, ...] most recent first
-let pasteboardHistorySize = 4000
 let pasteboardWatcherStarted = false
 
 let vpnServices = []        // [string]
@@ -28,7 +27,7 @@ let vpnFetchInFlight = false
 let fileSearchQuery = null
 let fileSearchResults = []  // [{ text, path }]
 
-let userActions = {}        // name -> { url, keyword }
+var config = {}
 
 // ---------------------------------------------------------------------------
 // Plugin: apps
@@ -144,7 +143,7 @@ function calcSelect(item) {
 // ---------------------------------------------------------------------------
 
 function userActionsQuery(keyword, text) {
-    const entry = Object.entries(userActions).find(([, v]) => v.keyword === keyword)
+    const entry = Object.entries(config.userActions).find(([, v]) => v.keyword === keyword)
     if (!entry) return []
     const [name, action] = entry
     const url = action.url.replace("${query}", encodeURIComponent(text))
@@ -167,8 +166,8 @@ function startPasteboardWatcher() {
         if (!value) return
         pasteboardHistory = pasteboardHistory.filter((v) => v !== value)
         pasteboardHistory.unshift(value)
-        if (pasteboardHistory.length > pasteboardHistorySize) {
-            pasteboardHistory.length = pasteboardHistorySize
+        if (pasteboardHistory.length > config.pasteboardHistorySize) {
+            pasteboardHistory.length = config.pasteboardHistorySize
         }
     })
 }
@@ -310,12 +309,6 @@ function onSelect(item) {
 // Public API
 // ---------------------------------------------------------------------------
 
-function configure(options) {
-    if (options.useractions) userActions = options.useractions
-    if (options.pasteboardHistorySize) pasteboardHistorySize = options.pasteboardHistorySize
-    return module.exports
-}
-
 function ensureChooser() {
     if (chooser) return
     chooser = hs.chooser.create()
@@ -329,7 +322,7 @@ function ensureChooser() {
 
 function show() {
     ensureChooser()
-    chooser.query = ""
+//    chooser.query = ""
     chooser.show()
 }
 
