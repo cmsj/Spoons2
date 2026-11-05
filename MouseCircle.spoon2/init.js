@@ -63,4 +63,6 @@ function bindHotkeys(mapping) {
     }
 }
 
-module.exports = { show, bindHotkeys }
+function start() {}
+
+module.exports = { show, bindHotkeys, start }
