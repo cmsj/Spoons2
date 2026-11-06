@@ -15,7 +15,6 @@
 
 let chooser = null
 let started = false
-let hotkey = null
 
 let appCache = []           // [{ text, bundleID }]
 let pasteboardHistory = []  // [string, ...] most recent first
@@ -355,10 +354,13 @@ function stop() {
     return module.exports
 }
 
-function bindHotkeys(mapping) {
-    if (mapping.show) {
-        hotkey = hs.hotkey.bind(mapping.show[0], mapping.show[1], () => show(), null)
+module.exports = {
+    start, stop, show, toggle,
+
+    // Actions for bindHotkeys(), which hs.spoons.load() provides. As in v1, toggle hides Seal if
+    // it's already showing.
+    bindings: {
+        show: { pressed: () => show(), message: "Show" },
+        toggle: { pressed: () => toggle(), message: "Toggle" }
     }
 }
-
-module.exports = { start, stop, show, toggle, bindHotkeys }

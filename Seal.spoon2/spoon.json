@@ -1,6 +1,6 @@
 {
     "name": "Seal",
     "author": "Chris Jones",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Alfred-like keyword launcher built on hs.chooser: apps, calculator, user-defined URL actions, clipboard history, file search, screenshots, and VPN toggling."
 }

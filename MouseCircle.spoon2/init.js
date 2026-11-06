@@ -11,7 +11,6 @@ const FADE_INTERVAL = 0.05 // seconds -> ~1s total fade
 
 let win = null
 let fadeTimer = null
-let hotkey = null
 
 function alphaHex(alpha) {
     const clamped = Math.max(0, Math.min(1, alpha))
@@ -57,12 +56,13 @@ function show() {
     })
 }
 
-function bindHotkeys(mapping) {
-    if (mapping.show) {
-        hotkey =hs.hotkey.bind(mapping.show[0], mapping.show[1], () => show(), null)
-    }
-}
-
 function start() {}
 
-module.exports = { show, bindHotkeys, start }
+module.exports = {
+    show, start,
+
+    // Actions for bindHotkeys(), which hs.spoons.load() provides
+    bindings: {
+        show: { pressed: () => show(), message: "Find the mouse pointer" }
+    }
+}

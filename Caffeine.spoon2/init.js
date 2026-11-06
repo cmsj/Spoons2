@@ -3,7 +3,6 @@
 
 let menuItem = null
 let active = false
-let hotkey = null
 
 function render() {
     menuItem.setIcon(HSImage.fromSymbol(active ? "cup.and.saucer.fill" : "cup.and.saucer"))
@@ -41,10 +40,11 @@ function stop() {
     return module.exports
 }
 
-function bindHotkeys(mapping) {
-    if (mapping.toggle) {
-        hotkey = hs.hotkey.bind(mapping.toggle[0], mapping.toggle[1], () => toggle(), null)
+module.exports = {
+    start, stop, setState, toggle,
+
+    // Actions for bindHotkeys(), which hs.spoons.load() provides
+    bindings: {
+        toggle: { pressed: () => toggle(), message: "Toggle sleep prevention" }
     }
 }
-
-module.exports = { start, stop, setState, toggle, bindHotkeys }
