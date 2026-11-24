@@ -17,23 +17,12 @@ const RADIUS = 12
 let cornerCanvases = []
 let screenWatcherSet = false
 
-// hs.screen coordinates are flipped (0,0 = top-left of the primary screen, y down), but
-// hs.canvas.create() takes raw AppKit coordinates (0,0 = bottom-left, y up) — convert here.
-function flippedToAppKit(x, y, w, h) {
-    const primaryHeight = hs.screen.primary().fullFrame.h
-    return { x, y: primaryHeight - y - h, w, h }
-}
-
 // `center` is the RADIUS x RADIUS box's INNER corner (opposite the physical screen
 // corner) — the punch-out circle sweeps outward from there, leaving a black sliver only
 // where the circle doesn't reach: the box's outer, physical-corner triangle.
 //
-// Note the y-axis mismatch this has to account for: the box's on-screen *position*
-// (x/y passed to create()) is unflipped AppKit coordinates (y=0 at the bottom of the
-// screen), but element *content* inside the canvas -- these frame/center coordinates --
-// is drawn through SwiftUI's Canvas, which is natively y-down (0,0 at the box's own
-// top-left, y increasing downward). So "inner corner" below is expressed in that
-// content-local, y-down sense, not the same sense as the box's screen position.
+// Both the box's on-screen position and its content coordinates use the same top-left
+// origin, y-down convention, so "inner corner" means the same thing in both.
 function makeCorner(boxX, boxY, center) {
     return hs.canvas.create({ x: boxX, y: boxY, w: RADIUS, h: RADIUS })
         .appendElements([
@@ -59,12 +48,12 @@ function render() {
     cornerCanvases = []
 
     for (const screen of hs.screen.all()) {
-        const f = flippedToAppKit(screen.fullFrame.x, screen.fullFrame.y, screen.fullFrame.w, screen.fullFrame.h)
+        const f = screen.fullFrame
 
-        cornerCanvases.push(makeCorner(f.x, f.y + f.h - RADIUS, { x: RADIUS, y: RADIUS }))  // top-left
-        cornerCanvases.push(makeCorner(f.x + f.w - RADIUS, f.y + f.h - RADIUS, { x: 0, y: RADIUS }))  // top-right
-        cornerCanvases.push(makeCorner(f.x, f.y, { x: RADIUS, y: 0 }))                      // bottom-left
-        cornerCanvases.push(makeCorner(f.x + f.w - RADIUS, f.y, { x: 0, y: 0 }))            // bottom-right
+        cornerCanvases.push(makeCorner(f.x, f.y, { x: RADIUS, y: RADIUS }))                             // top-left
+        cornerCanvases.push(makeCorner(f.x + f.w - RADIUS, f.y, { x: 0, y: RADIUS }))                   // top-right
+        cornerCanvases.push(makeCorner(f.x, f.y + f.h - RADIUS, { x: RADIUS, y: 0 }))                   // bottom-left
+        cornerCanvases.push(makeCorner(f.x + f.w - RADIUS, f.y + f.h - RADIUS, { x: 0, y: 0 }))         // bottom-right
     }
 }
 
