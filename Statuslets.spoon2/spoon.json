@@ -1,0 +1,6 @@
+{
+    "name": "Statuslets",
+    "author": "Chris Jones",
+    "version": "1.0.0",
+    "description": "Small coloured status dots beside the Dock, each coloured by a command or function you supply."
+}
