@@ -17,19 +17,12 @@ function alphaHex(alpha) {
     return Math.round(clamped * 255).toString(16).padStart(2, "0").toUpperCase()
 }
 
-// hs.mouse.absolutePosition() is flipped (0,0 = top-left of the primary screen, y down), but
-// hs.ui.window takes raw AppKit coordinates (0,0 = bottom-left, y up) — convert here.
-function flippedToAppKit(x, y, w, h) {
-    const primaryHeight = hs.screen.primary().fullFrame.h
-    return { x, y: primaryHeight - y - h, w, h }
-}
-
 function show() {
     if (win) { fadeTimer.stop(); win.destroy(); win = null }
 
     const pos = hs.mouse.absolutePosition()
     const color = HSColor.hex("#FF0000")
-    const rect = flippedToAppKit(pos.x - SIZE / 2, pos.y - SIZE / 2, SIZE, SIZE)
+    const rect = { x: pos.x - SIZE / 2, y: pos.y - SIZE / 2, w: SIZE, h: SIZE }
 
     win = hs.ui.window(rect)
         .titled(false)
