@@ -1,0 +1,6 @@
+{
+    "name": "StreamDeckPlugin",
+    "author": "Chris Jones",
+    "version": "1.0.0",
+    "description": "Controls Stream Deck keys and dials placed in the Elgato Stream Deck app, through the Hammerspoon 2 Stream Deck plugin: set their images and titles, and react to presses, turns and touches."
+}
