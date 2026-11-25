@@ -28,7 +28,7 @@
 // before the plugin connects, or while it's disconnected, is sent when it connects.
 //
 // Settings (set them directly, or with hs.spoons.use()'s config option, before start()):
-//   debug         Log every message to and from the plugin to the Console. Default: false
+//   debug         Log every message to and from the plugin to the Console, at Debug level. Default: false
 //
 // Methods:
 //   start(), stop()   Start and stop listening for the plugin.
@@ -303,7 +303,7 @@ function encodeVisual(fields) {
 // The connection
 
 function log(message) {
-    if (deck.debug) console.log(`[StreamDeckPlugin] ${message}`)
+    if (deck.debug) console.debug(`[StreamDeckPlugin] ${message}`)
 }
 
 function send(message) {
@@ -366,7 +366,7 @@ function handleMessage(sock, message) {
         if (connection) connection.disconnect()
         connection = sock
         plugin = message
-        console.log(`[StreamDeckPlugin] Stream Deck plugin ${message.plugin} connected (Stream Deck ${message.streamDeck})`)
+        console.info(`[StreamDeckPlugin] Stream Deck plugin ${message.plugin} connected (Stream Deck ${message.streamDeck})`)
         send({ type: "hello", protocol: PROTOCOL_VERSION, spoon: deck.version || "?" })
         return
     }
@@ -456,7 +456,7 @@ function onSocketEvent(event, sock, data) {
             try {
                 message = JSON.parse(line)
             } catch (err) {
-                console.error(`[StreamDeckPlugin] Ignoring malformed message: ${line.slice(0, 200)}`)
+                console.warn(`[StreamDeckPlugin] Ignoring malformed message: ${line.slice(0, 200)}`)
                 return
             }
             handleMessage(sock, message)
@@ -472,7 +472,7 @@ function onSocketEvent(event, sock, data) {
                 connection = null
                 plugin = null
                 instances.clear()
-                console.log("[StreamDeckPlugin] Stream Deck plugin disconnected")
+                console.info("[StreamDeckPlugin] Stream Deck plugin disconnected")
                 emitTo(handlers, "disconnect", { type: "disconnect" })
             }
             if (sock === listener) listener = null
@@ -488,7 +488,7 @@ function start() {
         return deck
     }
     listener = hs.socket.create().setCallback(onSocketEvent).listenUnix(`${dir}/${SOCKET_FILE}`)
-    console.log("[StreamDeckPlugin] started")
+    console.info("[StreamDeckPlugin] started")
     return deck
 }
 
@@ -496,6 +496,6 @@ function stop() {
     const sock = listener
     listener = null
     if (sock) sock.disconnect()   // also disconnects the plugin, which then retries until we're back
-    console.log("[StreamDeckPlugin] stopped")
+    console.info("[StreamDeckPlugin] stopped")
     return deck
 }
