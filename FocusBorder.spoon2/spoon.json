@@ -1,0 +1,6 @@
+{
+    "name": "FocusBorder",
+    "author": "Chris Jones",
+    "version": "1.0.0",
+    "description": "Draws a coloured border around the currently focused window, using hs.windowfilter and hs.canvas."
+}
