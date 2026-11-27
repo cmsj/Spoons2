@@ -167,8 +167,13 @@ function show() {
         const frame = screen.fullFrame
         const origin = { x: frame.x, y: frame.y }
         const canvas = hs.canvas.create(frame)
-            .levelValue(hs.canvas.windowLevels.screenSaver + 1)
-            .behaviorList(["canJoinAllSpaces", "fullScreenAuxiliary", "transient"])
+            // Just below the cursor level, the highest there is: above everything, including
+            // fullscreen apps, the menu bar and screen savers, but still under the pointer itself
+            .levelValue(hs.canvas.windowLevels.cursor - 1)
+            // On whichever Space is showing, including another app's fullscreen Space
+            .behaviorList(["canJoinAllSpaces", "fullScreenAuxiliary", "stationary", "ignoresCycle"])
+            // A non-activating panel, so showing it never takes focus from the fullscreen app
+            .clickActivating(false)
             .ignoreMouseEvents(true)
         canvas.appendElements(elementsFor(local(pos, origin), far))
         canvas.show(0)
