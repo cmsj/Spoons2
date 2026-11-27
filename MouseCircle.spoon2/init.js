@@ -15,8 +15,11 @@
 //
 // Usage:
 //   hs.spoons.load("MouseCircle").bindHotkeys({ show: [["cmd", "alt", "ctrl"], "m"] })
-//   // Also find the pointer by shaking the mouse:
-//   hs.spoons.use("MouseCircle", { config: { colors: ["#FF2D95", "#00E5FF", "#FFD60A"] }, start: true })
+//   // or, configured:
+//   hs.spoons.use("MouseCircle", {
+//       config: { colors: ["#FF2D95", "#00E5FF", "#FFD60A"] },
+//       hotkeys: { show: [["cmd", "alt", "ctrl"], "m"] },
+//   })
 
 const obj = {
     /// Ring colours, as hex strings, in the order the rings arrive. The last one is the ring that
@@ -30,12 +33,6 @@ const obj = {
     ringRadius: 34,
     /// Seconds the effect stays locked on to the pointer before fading away
     holdTime: 0.6,
-    /// Once `start()` has been called, shaking the mouse for this many seconds without pausing
-    /// shows the effect. The default leaves time for macOS's own shake-to-locate to enlarge the
-    /// pointer first, so the effect only appears if you're still shaking after that.
-    shakeDuration: 2.5,
-    /// The fewest mouse shakes (quick left-right direction changes) that can trigger the effect
-    shakeReversals: 4,
 }
 
 // Element indices, the same on every screen's canvas
@@ -53,7 +50,6 @@ let canvases = []       // [{canvas, origin}]
 let generation = 0      // bumped whenever an effect is started or torn down, to stop stale steps
 let followTimer = null
 let lastPos = null
-let shakeTap = null
 
 // --- helpers -------------------------------------------------------------------------------
 
@@ -258,72 +254,12 @@ function fadeAway(mine) {
     })
 }
 
-// --- shake to find -------------------------------------------------------------------------
-
-// A shake is a run of quick horizontal direction changes, each after a decent amount of travel.
-// It has to keep going for obj.shakeDuration seconds; a pause between reversals starts it over.
-const SHAKE_MAX_GAP = 0.5     // seconds allowed between reversals before the shake is over
-const SHAKE_MIN_TRAVEL = 60   // points the pointer has to travel between reversals
-
-// started: when the current run of reversals began; last: the latest reversal in it
-let shake = { x: null, dir: 0, travel: 0, started: 0, last: 0, reversals: 0 }
-
-function onMouseMoved(event) {
-    const x = event.location.x
-    if (shake.x === null) { shake.x = x; return }
-    const dx = x - shake.x
-    shake.x = x
-    if (dx === 0) return
-
-    const dir = dx > 0 ? 1 : -1
-    if (dir === shake.dir) {
-        shake.travel += Math.abs(dx)
-        return
-    }
-
-    const counts = shake.dir !== 0 && shake.travel >= SHAKE_MIN_TRAVEL
-    shake.dir = dir
-    shake.travel = Math.abs(dx)
-    if (!counts) return
-
-    const now = hs.timer.secondsSinceEpoch()
-    if (now - shake.last > SHAKE_MAX_GAP) {
-        shake.started = now
-        shake.reversals = 0
-    }
-    shake.last = now
-    shake.reversals += 1
-
-    if (now - shake.started >= obj.shakeDuration && shake.reversals >= obj.shakeReversals) {
-        // Start a fresh run, so shaking on afterwards needs another full shakeDuration
-        shake.started = now
-        shake.reversals = 0
-        if (canvases.length === 0) show()
-    }
-}
-
 // --- public API ----------------------------------------------------------------------------
 
 obj.show = show
 
-/// Starts watching for the mouse being shaken, which shows the effect
-obj.start = function() {
-    if (shakeTap) return obj
-    const types = hs.eventtap.eventTypes
-    shakeTap = hs.eventtap.addWatcher(
-        [types.mouseMoved, types.leftMouseDragged, types.rightMouseDragged],
-        onMouseMoved, true)
-    if (shakeTap) shakeTap.start()
-    else console.warn("MouseCircle: couldn't watch the mouse for shakes (is Accessibility permission granted?)")
-    return obj
-}
-
-/// Stops watching for mouse shakes, and removes the effect if it's showing
+/// Removes the effect if it's showing
 obj.stop = function() {
-    if (shakeTap) {
-        hs.eventtap.removeWatcher(shakeTap)
-        shakeTap = null
-    }
     teardown()
     return obj
 }
