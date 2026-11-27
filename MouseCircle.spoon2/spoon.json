@@ -2,5 +2,5 @@
     "name": "MouseCircle",
     "author": "Chris Jones",
     "version": "2.0.0",
-    "description": "Finds the mouse pointer across every monitor: the desktop dims around a spotlight on the pointer, while coloured rings sweep in from the edges and lock on. Trigger with a hotkey, or by shaking the mouse."
+    "description": "Finds the mouse pointer across every monitor: the desktop dims around a spotlight on the pointer, while coloured rings sweep in from the edges and lock on. Triggered with a hotkey."
 }
