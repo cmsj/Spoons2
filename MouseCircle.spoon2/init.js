@@ -30,8 +30,11 @@ const obj = {
     ringRadius: 34,
     /// Seconds the effect stays locked on to the pointer before fading away
     holdTime: 0.6,
-    /// Mouse shakes (quick left-right direction changes) needed to trigger the effect, once
-    /// `start()` has been called
+    /// Once `start()` has been called, shaking the mouse for this many seconds without pausing
+    /// shows the effect. The default leaves time for macOS's own shake-to-locate to enlarge the
+    /// pointer first, so the effect only appears if you're still shaking after that.
+    shakeDuration: 2.5,
+    /// The fewest mouse shakes (quick left-right direction changes) that can trigger the effect
     shakeReversals: 4,
 }
 
@@ -252,11 +255,13 @@ function fadeAway(mine) {
 
 // --- shake to find -------------------------------------------------------------------------
 
-// A shake is several quick horizontal direction changes, each after a decent amount of travel
-const SHAKE_WINDOW = 0.9      // seconds the reversals have to happen within
+// A shake is a run of quick horizontal direction changes, each after a decent amount of travel.
+// It has to keep going for obj.shakeDuration seconds; a pause between reversals starts it over.
+const SHAKE_MAX_GAP = 0.5     // seconds allowed between reversals before the shake is over
 const SHAKE_MIN_TRAVEL = 60   // points the pointer has to travel between reversals
 
-let shake = { x: null, dir: 0, travel: 0, reversals: [] }
+// started: when the current run of reversals began; last: the latest reversal in it
+let shake = { x: null, dir: 0, travel: 0, started: 0, last: 0, reversals: 0 }
 
 function onMouseMoved(event) {
     const x = event.location.x
@@ -271,16 +276,23 @@ function onMouseMoved(event) {
         return
     }
 
-    const now = hs.timer.secondsSinceEpoch()
-    if (shake.dir !== 0 && shake.travel >= SHAKE_MIN_TRAVEL) {
-        shake.reversals.push(now)
-    }
+    const counts = shake.dir !== 0 && shake.travel >= SHAKE_MIN_TRAVEL
     shake.dir = dir
     shake.travel = Math.abs(dx)
-    shake.reversals = shake.reversals.filter(t => now - t <= SHAKE_WINDOW)
+    if (!counts) return
 
-    if (shake.reversals.length >= obj.shakeReversals) {
-        shake.reversals = []
+    const now = hs.timer.secondsSinceEpoch()
+    if (now - shake.last > SHAKE_MAX_GAP) {
+        shake.started = now
+        shake.reversals = 0
+    }
+    shake.last = now
+    shake.reversals += 1
+
+    if (now - shake.started >= obj.shakeDuration && shake.reversals >= obj.shakeReversals) {
+        // Start a fresh run, so shaking on afterwards needs another full shakeDuration
+        shake.started = now
+        shake.reversals = 0
         if (canvases.length === 0) show()
     }
 }
